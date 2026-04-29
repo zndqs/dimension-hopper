@@ -15,8 +15,13 @@ var teleport_phase = 0.0
 var fusion_chord_phase = 0.0
 var fusion_chord_mix = 0.0
 
+var shadow_resonance_phase = 0.0
+var shadow_resonance_mix = 0.0
+var shadow_sweep = 0.0
+
 var alignment_intensity = 0.0
 var fusion_intensity = 0.0
+var shadow_alignment_intensity = 0.0
 
 const PI = 3.1415926535
 
@@ -50,6 +55,13 @@ func set_alignment_intensity(value):
 
 func set_fusion_intensity(value):
     fusion_intensity = clamp(value, 0.0, 1.0)
+
+func set_shadow_alignment_intensity(value):
+    shadow_alignment_intensity = clamp(value, 0.0, 1.0)
+    shadow_resonance_mix = lerp(shadow_resonance_mix, value, 0.1)
+
+func trigger_shadow_resonance():
+    shadow_sweep = 0.001
 
 func trigger_teleport():
     teleport_sweep = 0.001
@@ -128,6 +140,33 @@ func _process(delta):
             chord *= fusion_chord_mix
         
         # ==============================================
+        #  OSCILLATOR 6: Shadow Resonance (Subsonic + Whistling)
+        # ==============================================
+        var shadow_sound = 0.0
+        if shadow_resonance_mix > 0.01:
+            # Deep subsonic hum (E1 - 41.2Hz) + high ethereal overtone
+            var shadow_root = 41.2
+            var shadow_overtone = 2469.4  # D7
+            
+            shadow_resonance_phase += 1.0 / mix_rate
+            
+            var hum = sin(shadow_resonance_phase * shadow_root * 2.0 * PI) * 0.25
+            var whisper = sin(shadow_resonance_phase * shadow_overtone * 2.0 * PI) * 0.05
+            shadow_sound = (hum + whisper) * shadow_resonance_mix
+        
+        # ==============================================
+        #  OSCILLATOR 7: Shadow Time Travel Sweep
+        # ==============================================
+        if shadow_sweep > 0.001:
+            shadow_sweep += 1.0 / mix_rate * 2.0
+            if shadow_sweep < 1.0:
+                var sweep_freq = 30.0 + pow(shadow_sweep, 2.0) * 4000.0
+                var sweep_phase = shadow_sweep * 100.0
+                shadow_sound += sin(sweep_phase * sweep_freq * 2.0 * PI) * (1.0 - shadow_sweep) * 0.3
+            else:
+                shadow_sweep = 0.0
+        
+        # ==============================================
         #  OSCILLATOR 5: Subtle Noise Grain
         # ==============================================
         var grain = randf() * 2.0 - 1.0
@@ -136,7 +175,7 @@ func _process(delta):
         # ==============================================
         #  FINAL MIX
         # ==============================================
-        var sample = carrier + overtone + teleport_sound + chord + grain
+        var sample = carrier + overtone + teleport_sound + chord + shadow_sound + grain
         
         var left = sample * 0.8
         var right = sample * 0.8 + overtone * 0.3

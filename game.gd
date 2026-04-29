@@ -6,6 +6,7 @@ extends Node3D
 @onready var post_process: ColorRect = $CanvasLayer/PostProcess
 @onready var shader_material: ShaderMaterial = post_process.material
 @onready var audio_system: Node = $AudioSystem
+@onready var shadow_system: Node = $ShadowSystem
 
 @onready var wall_near: MeshInstance3D = $Wall_Near
 @onready var wall_far: MeshInstance3D = $Wall_Far
@@ -25,11 +26,16 @@ var is_fused = false
 var fusion_intensity = 0.0
 var door_opened = false
 
+var shadow_aligned = false
+var shadow_alignment_intensity = 0.0
+var time_traveling = false
+
 var move_speed = 6.0
 var mouse_sensitivity = 0.0025
 var camera_rotation = Vector2.ZERO
 
 var has_teleported = false
+var has_time_traveled = false
 var teleport_cooldown = 0.0
 var teleport_pulse = 0.0
 var fusion_cooldown = 0.0
@@ -40,14 +46,14 @@ func _ready():
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     print("")
     print("=============================================================")
-    print("  DIMENSION HOPPER - PROTOTYPE v0.4")
+    print("  DIMENSION HOPPER - PROTOTYPE v0.5")
     print("=============================================================")
     print("")
-    print("  NEW: Pure Synthesis Audio System!")
-    print("    * Sine wave carrier rises with alignment intensity")
-    print("    * Harmonic overtones near perfect alignment")
-    print("    * Frequency sweep on teleport")
-    print("    * Major triad arpeggio on fusion")
+    print("  NEW: Shadow History Mechanism!")
+    print("    * Your past movements recorded and played back")
+    print("    * Semi-transparent shadow repeats your actions")
+    print("    * Align with your shadow to time travel")
+    print("    * Subsonic resonance + time tunnel visual effects")
     print("")
     print("  CONTROLS: WASD Move, Mouse Look, SPACE Activate")
     print("")
@@ -67,15 +73,23 @@ func _input(event):
 func _process(delta):
     game_time += delta
     
-    # Update visual effects
+    # Get shadow state
+    shadow_alignment_intensity = shadow_system.get_alignment_intensity()
+    shadow_aligned = shadow_system.is_aligned()
+    time_traveling = shadow_system.get_time_travel_blend() > 0.001
+    
+    # Update all shader parameters
     shader_material.set_shader_parameter("alignment_intensity", alignment_intensity)
     shader_material.set_shader_parameter("fusion_intensity", fusion_intensity)
+    shader_material.set_shader_parameter("shadow_alignment", shadow_alignment_intensity)
+    shader_material.set_shader_parameter("time_travel_blend", shadow_system.get_time_travel_blend())
     shader_material.set_shader_parameter("time", game_time)
     
-    # Update audio synthesis
-    audio_system.set_alignment_intensity(alignment_intensity)
+    # Update audio system
+    audio_system.set_alignment_intensity(max(alignment_intensity, fusion_intensity))
     audio_system.set_fusion_intensity(fusion_intensity)
-    audio_system.update_sound(alignment_intensity, fusion_intensity, teleport_pulse > 0.1, delta)
+    audio_system.set_shadow_alignment_intensity(shadow_alignment_intensity)
+    audio_system.update_sound(max(alignment_intensity, fusion_intensity), fusion_intensity, teleport_pulse > 0.1, delta)
     
     # Teleport pulse animation
     if teleport_pulse > 0:
@@ -94,11 +108,19 @@ func _physics_process(delta):
     if fusion_cooldown > 0:
         fusion_cooldown -= delta
     
+    # Wall teleport
     if is_aligned and Input.is_action_just_pressed("ui_accept") and teleport_cooldown <= 0:
         perform_teleport()
     
+    # Key-lock fusion
     if is_fused and Input.is_action_just_pressed("ui_accept") and fusion_cooldown <= 0:
         perform_fusion()
+    
+    # Shadow time travel
+    if shadow_aligned and Input.is_action_just_pressed("ui_accept") and teleport_cooldown <= 0:
+        if shadow_system.trigger_time_travel():
+            audio_system.trigger_shadow_resonance()
+            teleport_cooldown = 2.0
 
 func handle_movement(delta):
     var input_dir = Input.get_vector("left", "right", "forward", "backward")
@@ -169,12 +191,13 @@ func perform_fusion():
     fusion_cooldown = 1.0
 
 func update_visual_feedback(delta):
-    var target_energy = 0.5 + alignment_intensity * 8.0 + fusion_intensity * 6.0
-    alignment_light.light_energy = move_toward(alignment_light.light_energy, target_energy, delta * 20.0)
+    var target_energy = 0.5 + alignment_intensity * 8.0 + fusion_intensity * 6.0 + shadow_alignment_intensity * 4.0
+    alignment_light.light_energy = lerp(alignment_light.light_energy, target_energy, delta * 10.0)
+    alignment_light.light_color = Color(0.8 + shadow_alignment_intensity * 0.2, 0.9, 1.0)
     
-    if alignment_intensity > 0.3 or fusion_intensity > 0.3:
-        var shake_x = randf_range(-1, 1) * max(alignment_intensity, fusion_intensity) * 2.5
-        var shake_y = randf_range(-1, 1) * max(alignment_intensity, fusion_intensity) * 2.5
+    if alignment_intensity > 0.3 or fusion_intensity > 0.3 or shadow_alignment_intensity > 0.3:
+        var shake_x = randf_range(-1, 1) * max(alignment_intensity, fusion_intensity, shadow_alignment_intensity) * 2.5
+        var shake_y = randf_range(-1, 1) * max(alignment_intensity, fusion_intensity, shadow_alignment_intensity) * 2.5
         camera.position = Vector3(shake_x * 0.006, shake_y * 0.006, 0)
     else:
         camera.position = Vector3.ZERO
@@ -182,14 +205,16 @@ func update_visual_feedback(delta):
     if is_aligned and not has_teleported:
         print("  >>> WALLS ALIGNED! Press SPACE to teleport! <<<")
         has_teleported = true
-    elif not is_aligned:
+    elif shadow_aligned and not has_time_traveled:
+        print("  >>> SHADOW ALIGNED! Press SPACE to time travel! <<<")
+        has_time_traveled = true
+    elif not is_aligned and not shadow_aligned:
         has_teleported = false
+        has_time_traveled = false
 
 func smoothstep(edge0, edge1, x):
     var t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0)
     return t * t * (3.0 - 2.0 * t)
 
-func move_toward(from, to, delta):
-    if abs(to - from) <= delta:
-        return to
-    return from + sign(to - from) * delta
+func lerp(a, b, t):
+    return a + (b - a) * t

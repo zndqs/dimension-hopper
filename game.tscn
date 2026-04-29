@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://game.gd" id="1_game"]
 [ext_resource type="Script" path="res://audio_system.gd" id="2_audio"]
-[ext_resource type="Shader" path="res://post_process.gdshader" id="3_shader"]
+[ext_resource type="Script" path="res://shadow_history.gd" id="3_shadow"]
+[ext_resource type="Shader" path="res://post_process.gdshader" id="4_shader"]
 
 [sub_resource type="BoxMesh" id="box"]
 size = Vector3(1, 1, 1)
@@ -23,10 +24,12 @@ height = 1.8
 size = Vector3(1, 1, 1)
 
 [sub_resource type="ShaderMaterial" id="shader_mat"]
-shader = ExtResource("3_shader")
+shader = ExtResource("4_shader")
 shader_parameter/alignment_intensity = 0.0
 shader_parameter/teleport_pulse = 0.0
 shader_parameter/fusion_intensity = 0.0
+shader_parameter/shadow_alignment = 0.0
+shader_parameter/time_travel_blend = 0.0
 shader_parameter/time = 0.0
 
 [node name="GameRoot" type="Node3D"]
@@ -34,6 +37,12 @@ script = ExtResource("1_game")
 
 [node name="AudioSystem" type="Node" parent="."]
 script = ExtResource("2_audio")
+
+[node name="ShadowSystem" type="Node" parent="."]
+script = ExtResource("3_shadow")
+
+[node name="ShadowMesh" type="MeshInstance3D" parent="ShadowSystem"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, 0.353553, -0.353553, 0, 0.707107, 0.707107, 0.5, -0.612372, 0.612372, 0, 8, 0)
