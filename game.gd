@@ -5,6 +5,7 @@ extends Node3D
 @onready var alignment_light: OmniLight3D = $Player/AlignmentLight
 @onready var post_process: ColorRect = $CanvasLayer/PostProcess
 @onready var shader_material: ShaderMaterial = post_process.material
+@onready var audio_system: Node = $AudioSystem
 
 @onready var wall_near: MeshInstance3D = $Wall_Near
 @onready var wall_far: MeshInstance3D = $Wall_Far
@@ -39,13 +40,14 @@ func _ready():
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     print("")
     print("=============================================================")
-    print("  DIMENSION HOPPER - PROTOTYPE v0.3")
+    print("  DIMENSION HOPPER - PROTOTYPE v0.4")
     print("=============================================================")
     print("")
-    print("  NEW: Post-Processing Shader Effects")
-    print("    * Alignment glow + vignette")
-    print("    * RGB chromatic aberration on teleport")
-    print("    * Blue wave distortion on fusion")
+    print("  NEW: Pure Synthesis Audio System!")
+    print("    * Sine wave carrier rises with alignment intensity")
+    print("    * Harmonic overtones near perfect alignment")
+    print("    * Frequency sweep on teleport")
+    print("    * Major triad arpeggio on fusion")
     print("")
     print("  CONTROLS: WASD Move, Mouse Look, SPACE Activate")
     print("")
@@ -65,10 +67,17 @@ func _input(event):
 func _process(delta):
     game_time += delta
     
+    # Update visual effects
     shader_material.set_shader_parameter("alignment_intensity", alignment_intensity)
     shader_material.set_shader_parameter("fusion_intensity", fusion_intensity)
     shader_material.set_shader_parameter("time", game_time)
     
+    # Update audio synthesis
+    audio_system.set_alignment_intensity(alignment_intensity)
+    audio_system.set_fusion_intensity(fusion_intensity)
+    audio_system.update_sound(alignment_intensity, fusion_intensity, teleport_pulse > 0.1, delta)
+    
+    # Teleport pulse animation
     if teleport_pulse > 0:
         teleport_pulse -= delta * 1.5
         teleport_pulse = max(0.0, teleport_pulse)
@@ -135,6 +144,8 @@ func perform_teleport():
     print("")
     
     teleport_pulse = 1.0
+    audio_system.trigger_teleport()
+    
     player.global_position = teleport_target.global_position
     teleport_cooldown = 1.5
     camera.reset_smoothing()
@@ -148,6 +159,7 @@ func perform_fusion():
     
     door_opened = true
     door_collision.disabled = true
+    audio_system.trigger_fusion()
     
     var tween = create_tween()
     tween.tween_property(fusion_door, "position:y", fusion_door.position.y + 4.0, 1.5)

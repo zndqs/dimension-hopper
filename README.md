@@ -12,7 +12,19 @@ Two parallel walls stand before an abyss. When they align perfectly in your view
 ### Mechanism 2: Perspective Fusion
 A key floats in the air. A lock sits on a wall. When they overlap perfectly in your view, they fuse. Press SPACE to unlock the door.
 
-## ✨ Visual Effects (v0.3)
+## 👂 Audio System (v0.4)
+
+All sounds are **generated procedurally** — no audio files needed. Your cognitive progress directly shapes the sound.
+
+| Sound Layer | Description |
+|-------------|-------------|
+| **Alignment Carrier** | Continuous sine wave that rises in frequency as you approach perfect alignment (110Hz → 880Hz) |
+| **Overtone Harmonics** | 3rd harmonic fades in near perfect alignment — crystal resonance feeling |
+| **Teleport Sweep** | Exponential frequency sweep (100Hz → 8kHz) when dimension hopping |
+| **Fusion Chord** | A major triad arpeggio (A C# E) that plays when you successfully fuse key and lock |
+| **Grain Texture** | Subtle noise that intensifies with alignment |
+
+## ✨ Visual Effects
 
 | Effect | Description |
 |--------|-------------|
@@ -56,34 +68,39 @@ A key floats in the air. A lock sits on a wall. When they overlap perfectly in y
 ```
 dimension-hopper/
 ├── project.godot          # Project config
-├── game.gd               # Main game logic (2 mechanisms + shader control)
+├── game.gd               # Main game logic (2 mechanisms + shader + audio control)
 ├── game.tscn             # Main 3D scene
-├── post_process.gdshader # Post-processing effects
-├── post_process.tres     # Shader material
-├── default_env.tres     # Environment settings
+├── audio_system.gd       # Procedural audio synthesis engine (5 oscillators)
+├── post_process.gdshader # Full-screen post effects
+├── default_env.tres      # Environment settings
 └── README.md
 ```
 
-## 🧠 Current Features (v0.3)
+## 🧠 Current Features (v0.4)
 
 ✅ **Two complete knowledge lock mechanisms:**
 1. Edge Alignment Teleport (screen space pixel distance detection)
 2. Perspective Fusion (key + lock overlap in view)
 
-✅ **Post-processing Shader Effects:**
+✅ **Full-screen Post-processing Shader**
 - Alignment glow + vignette
 - RGB chromatic aberration on teleport
 - Blue tint + wave distortion on fusion
 - Subtle film grain
 
+✅ **Pure Procedural Audio Synthesis**
+- 48kHz stereo generation at runtime
+- No audio files, 100% code-generated sound
+- Sine wave carrier maps to cognitive progress
+- Major triad arpeggio on successful fusion
+- Exponential sweep on teleport
+
 ✅ **First-person movement**
-✅ **Visual feedback system**
 ✅ **Clean minimalist aesthetic**
 
 ## 🔮 Roadmap
 
 - [ ] **Mechanism 3: Shadow History** (your past actions' shadows interact with present)
-- [ ] **Sound design** — Pure sine wave synthesis, frequency maps to cognitive progress
 - [ ] **3-5 complete levels with compound puzzles**
 - [ ] **Steam store page**
 
