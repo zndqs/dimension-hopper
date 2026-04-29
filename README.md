@@ -12,21 +12,32 @@ Two parallel walls stand before an abyss. When they align perfectly in your view
 ### Mechanism 2: Perspective Fusion
 A key floats in the air. A lock sits on a wall. When they overlap perfectly in your view, they fuse. Press SPACE to unlock the door.
 
+## ✨ Visual Effects (v0.3)
+
+| Effect | Description |
+|--------|-------------|
+| **Alignment Glow** | Screen gets brighter the closer you are to perfect alignment |
+| **Vignette Pulse** | Dark edges contract inwards as you approach alignment |
+| **RGB Chromatic Aberration** | Teleport triggers a brief RGB channel separation |
+| **White Flash** | Bright white pulse at the moment of dimension hop |
+| **Blue Wave Distortion** | Fusion creates subtle horizontal wave patterns |
+| **Film Grain** | Subtle grain effect intensifies with alignment |
+
 ## 🎯 Design Philosophy
 
 **Knowledge Lock Games** are about:
-- **No external knowledge required — everything you need is in the game
+- **No external knowledge required** — everything you need is in the game
 - **No inventory** — your brain is the only tool
 - **"Aha!" moments** — pure pleasure of sudden understanding
-- **Player's mind is the true character — your perspective is what changes, not the world
+- **Player's mind is the true character** — your perspective is what changes, not the world
 
 ## 🎨 Art Style
 
-- **Minimalist pure white architecture
+- **Minimalist pure white architecture**
 - **Pure black** interactive objects
-- **No textures, no decorations
-- **Soft global illumination only
-- **Visual feedback maps directly to cognitive progress
+- **No textures, no decorations**
+- **Soft global illumination only**
+- **Visual feedback maps directly to cognitive progress**
 
 ## 🕹️ Controls
 
@@ -45,33 +56,36 @@ A key floats in the air. A lock sits on a wall. When they overlap perfectly in y
 ```
 dimension-hopper/
 ├── project.godot          # Project config
-├── game.gd               # Main game logic
-├── game.tscn             # Main scene
+├── game.gd               # Main game logic (2 mechanisms + shader control)
+├── game.tscn             # Main 3D scene
+├── post_process.gdshader # Post-processing effects
+├── post_process.tres     # Shader material
 ├── default_env.tres     # Environment settings
-└── godot                # Engine binary (Linux)
+└── README.md
 ```
 
-## 🧠 Current Features
+## 🧠 Current Features (v0.3)
 
-✅ **Two complete knowledge lock mechanisms:
-1. Edge Alignment Teleport
-2. Perspective Fusion Door Unlock
+✅ **Two complete knowledge lock mechanisms:**
+1. Edge Alignment Teleport (screen space pixel distance detection)
+2. Perspective Fusion (key + lock overlap in view)
 
-✅ **Complete first puzzle level**
+✅ **Post-processing Shader Effects:**
+- Alignment glow + vignette
+- RGB chromatic aberration on teleport
+- Blue tint + wave distortion on fusion
+- Subtle film grain
+
 ✅ **First-person movement**
-✅ **Visual feedback system** (light intensity, screen shake)
+✅ **Visual feedback system**
 ✅ **Clean minimalist aesthetic**
 
 ## 🔮 Roadmap
 
-- [ ] **Mechanism 3: Shadow History (your past actions' shadows interact with present)
-- [ ] **Mechanism 4: Time Residue (past and future exist simultaneously)
-- [ ] **Sound design: Pure sine wave drones
-- [ ] **Post-processing effects** (glow, aberration on alignment
-- [ ] **3-5 complete levels**
+- [ ] **Mechanism 3: Shadow History** (your past actions' shadows interact with present)
+- [ ] **Sound design** — Pure sine wave synthesis, frequency maps to cognitive progress
+- [ ] **3-5 complete levels with compound puzzles**
 - [ ] **Steam store page**
-
-## 🎯 v0.2
 
 ---
 

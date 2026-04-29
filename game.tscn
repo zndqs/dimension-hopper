@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://game.gd" id="1_game"]
+[ext_resource type="ShaderMaterial" path="res://post_process.tres" id="2_shader"]
 
 [sub_resource type="BoxMesh" id="box"]
 size = Vector3(1, 1, 1)
@@ -19,6 +20,13 @@ height = 1.8
 
 [sub_resource type="BoxShape3D" id="box_shape"]
 size = Vector3(1, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="shader_mat"]
+shader = ExtResource("2_shader")
+shader_parameter/alignment_intensity = 0.0
+shader_parameter/teleport_pulse = 0.0
+shader_parameter/fusion_intensity = 0.0
+shader_parameter/time = 0.0
 
 [node name="GameRoot" type="Node3D"]
 script = ExtResource("1_game")
@@ -114,3 +122,14 @@ shape = SubResource("box_shape")
 transform = Transform3D(1.2, 1.2, 0, 1.2, 0, 0, 0, 0, 1.2, 0, 1.2, 3)
 mesh = SubResource("box")
 material_override = SubResource("black")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 1
+
+[node name="PostProcess" type="ColorRect" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+material = SubResource("shader_mat")

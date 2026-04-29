@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://post_process_shader"]
+
+[ext_resource type="Shader" path="res://post_process.gdshader" id="1_shader"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/alignment_intensity = 0.0
+shader_parameter/teleport_pulse = 0.0
+shader_parameter/fusion_intensity = 0.0
+shader_parameter/time = 0.0

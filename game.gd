@@ -3,6 +3,8 @@ extends Node3D
 @onready var player: CharacterBody3D = $Player
 @onready var camera: Camera3D = $Player/Camera3D
 @onready var alignment_light: OmniLight3D = $Player/AlignmentLight
+@onready var post_process: ColorRect = $CanvasLayer/PostProcess
+@onready var shader_material: ShaderMaterial = post_process.material
 
 @onready var wall_near: MeshInstance3D = $Wall_Near
 @onready var wall_far: MeshInstance3D = $Wall_Far
@@ -28,24 +30,24 @@ var camera_rotation = Vector2.ZERO
 
 var has_teleported = false
 var teleport_cooldown = 0.0
+var teleport_pulse = 0.0
 var fusion_cooldown = 0.0
+
+var game_time = 0.0
 
 func _ready():
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     print("")
     print("=============================================================")
-    print("  DIMENSION HOPPER - PROTOTYPE v0.2")
+    print("  DIMENSION HOPPER - PROTOTYPE v0.3")
     print("=============================================================")
     print("")
-    print("  TWO KNOWLEDGE LOCK MECHANISMS:")
+    print("  NEW: Post-Processing Shader Effects")
+    print("    * Alignment glow + vignette")
+    print("    * RGB chromatic aberration on teleport")
+    print("    * Blue wave distortion on fusion")
     print("")
-    print("  1. EDGE ALIGNMENT - Two walls become one in your view")
-    print("  2. PERSPECTIVE FUSION - Key and lock merge in your view")
-    print("")
-    print("  CONTROLS:")
-    print("    WASD  - Move")
-    print("    MOUSE - Look around")
-    print("    SPACE - Activate when aligned")
+    print("  CONTROLS: WASD Move, Mouse Look, SPACE Activate")
     print("")
     print("=============================================================")
     print("")
@@ -59,6 +61,18 @@ func _input(event):
         player.transform.basis = Basis.IDENTITY
         player.rotate_y(camera_rotation.x)
         camera.rotation.x = camera_rotation.y
+
+func _process(delta):
+    game_time += delta
+    
+    shader_material.set_shader_parameter("alignment_intensity", alignment_intensity)
+    shader_material.set_shader_parameter("fusion_intensity", fusion_intensity)
+    shader_material.set_shader_parameter("time", game_time)
+    
+    if teleport_pulse > 0:
+        teleport_pulse -= delta * 1.5
+        teleport_pulse = max(0.0, teleport_pulse)
+        shader_material.set_shader_parameter("teleport_pulse", teleport_pulse)
 
 func _physics_process(delta):
     handle_movement(delta)
@@ -115,20 +129,21 @@ func check_perspective_fusion():
 
 func perform_teleport():
     print("")
-    print("  **************************************************")
+    print("  ==================================================")
     print("  *   DIMENSION HOP - TELEPORT SUCCESSFUL!        *")
-    print("  **************************************************")
+    print("  ==================================================")
     print("")
     
+    teleport_pulse = 1.0
     player.global_position = teleport_target.global_position
     teleport_cooldown = 1.5
     camera.reset_smoothing()
 
 func perform_fusion():
     print("")
-    print("  **************************************************")
+    print("  ==================================================")
     print("  *   PERSPECTIVE FUSION - DOOR UNLOCKED!         *")
-    print("  **************************************************")
+    print("  ==================================================")
     print("")
     
     door_opened = true
